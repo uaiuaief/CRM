@@ -487,7 +487,6 @@ class UiMainWindow(object):
         results_found = self.create_customer_table(search_results)
 
         if not results_found and button:
-            print(button)
             msg = QMessageBox()
             msg.setWindowTitle('Alerta')
             msg.setText('Nenhum cliente encontrado')

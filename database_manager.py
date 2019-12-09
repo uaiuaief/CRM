@@ -5,6 +5,14 @@ conn = sqlite3.connect("clients.db")
 c = conn.cursor()
 
 
+def initialize_database():
+    with conn:
+        c.execute('CREATE TABLE IF NOT EXISTS vendas '
+                  '(client_id int, price text, product text, date text)')
+        c.execute('CREATE TABLE IF NOT EXISTS clientes '
+                  '(nome text, rua text, número text,bairro text, referência text, telefone text,data text)')
+
+
 def add_to_database(nome, rua, bairro, telefone, referencia, número, data=datetime.today().strftime('%d-%m-%Y'),
                     produto=None, preço=None):
     rowid = get_customer_id(nome=nome, rua=rua, bairro=bairro, número=número)
