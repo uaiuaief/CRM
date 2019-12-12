@@ -22,7 +22,7 @@ def add_to_database(nome, rua, bairro, telefone, referencia, número, data=datet
                       {'rowid': rowid, 'preço': preço, 'produto': produto, 'data': data})
         return 'existent customer'
     else:
-        if nome != '' and rua != '' and bairro != '' and número != '':
+        if nome != '' and rua != '' and bairro != '' and número != '' and produto !='' and preço != '':
             try:
                 d, m, y = data.split('/')
                 d = f"{int(d):02d}"
@@ -65,6 +65,9 @@ def search_database(nome=None, rua=None, bairro=None, telefone=None, referencia=
                        'referência': referencia, 'número': número, 'data': data}
 
     search_elements = {each: search_elements[each] for each in search_elements if search_elements[each] != ''}
+    # data = f"%{data}%"
+    data = add_wild_card(data)
+    # print(data)
 
     query = "SELECT * FROM clientes WHERE "
 
@@ -143,7 +146,8 @@ def search_month(data, nome='', número='', rua='', bairro=''):
 
 def search_sales(customer_id, date):
     with conn:
-        date = f"%{date}"
+        # date = f"%{date}"
+        date = add_wild_card(date)
         c.execute("SELECT * FROM clientes WHERE rowid=:customer_id", {'customer_id': customer_id})
         fetch1 = c.fetchall()
         c.execute("SELECT * FROM vendas WHERE client_id=:customer_id AND date LIKE :date ORDER BY DATE", {'customer_id': customer_id, 'date': date})
@@ -157,3 +161,30 @@ def search_sales(customer_id, date):
             return result
         else:
             return False
+
+
+def get_column_list():
+    with conn:
+        c.execute('SELECT bairro FROM clientes')
+        bairros = c.fetchall()
+        bairros = [b[0] for b in bairros]
+        c.execute('SELECT rua FROM clientes')
+        ruas = c.fetchall()
+        ruas = [r[0] for r in ruas]
+
+    return bairros, ruas
+
+
+def delete_customer(rowid):
+    with conn:
+        c.execute('DELETE FROM clientes WHERE rowid=:rowid', {'rowid':rowid})
+        c.execute('DELETE FROM vendas WHERE client_id=:rowid', {'rowid':rowid})
+
+
+def update_customer(rowid, nome, rua, número, bairro, referência, telefone):
+    with conn:
+        c.execute('UPDATE clientes SET nome=:nome, rua=:rua, número=:número, bairro=:bairro, referência=:referência,'
+                  'telefone=:telefone WHERE rowid=:rowid',
+                  {'nome': nome, 'rua': rua, 'número': número, 'bairro': bairro, 'referência': referência,
+                   'telefone': telefone, 'rowid': rowid})
+
